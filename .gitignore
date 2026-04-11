@@ -1,0 +1,20 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Secretos - NO subir credenciales a git
+# Descomenta la siguiente línea si guardas secretos en terraform.tfvars:
+# *.tfvars
+
+# Ficheros generados
+kubeconfig
+talosconfig
+*.bak
