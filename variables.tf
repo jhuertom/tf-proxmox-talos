@@ -99,6 +99,12 @@ variable "gateway" {
   default     = "10.0.0.1"
 }
 
+variable "node_subnet_prefix" {
+  description = "Longitud del prefijo de subred para los nodos (ej: 23 para /23)"
+  type        = number
+  default     = 23
+}
+
 variable "nameservers" {
   description = "Servidores DNS"
   type        = list(string)

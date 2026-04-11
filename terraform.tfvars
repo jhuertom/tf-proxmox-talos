@@ -34,16 +34,18 @@ cluster_name     = "production"
 # El cluster_endpoint es una IP Virtual (VIP) que Talos gestiona automáticamente 
 #    entre los nodos control plane. Es la IP que usarás para conectarte al API 
 #    server de Kubernetes.
-cluster_endpoint = "192.168.2.210"
-gateway          = "192.168.2.1"
-nameservers      = ["1.1.1.1", "8.8.8.8"]
+cluster_endpoint = "192.168.3.250"
+gateway             = "192.168.2.1"
+node_subnet_prefix  = 23
+#nameservers         = ["1.1.1.1", "8.8.8.8"]
+nameservers         = ["192.168.2.1"]
 
 # =============================================================================
 # Control Plane Nodes (3 nodos, 1 por host Proxmox)
 # =============================================================================
 
 controlplane_count     = 3
-controlplane_ips       = ["192.168.2.211", "192.168.2.212", "192.168.2.213"]
+controlplane_ips       = ["192.168.3.251", "192.168.3.252", "192.168.3.253"]
 controlplane_cpu       = 2
 controlplane_memory    = 4096
 controlplane_disk_size = 20
@@ -54,7 +56,7 @@ controlplane_vm_id_start = 200
 # =============================================================================
 
 worker_count     = 3
-worker_ips       = ["192.168.2.231", "192.168.2.232", "192.168.2.233"]
+worker_ips       = ["192.168.3.240", "192.168.3.241", "192.168.3.242"]
 worker_cpu       = 2
 worker_memory    = 4096
 worker_disk_size = 50

@@ -55,7 +55,7 @@ resource "proxmox_virtual_environment_vm" "worker" {
 
     ip_config {
       ipv4 {
-        address = "${var.worker_ips[count.index]}/24"
+        address = "${var.worker_ips[count.index]}/${var.node_subnet_prefix}"
         gateway = var.gateway
       }
     }
@@ -100,7 +100,7 @@ resource "talos_machine_configuration_apply" "worker" {
           interfaces = [
             {
               interface = "eth0"
-              addresses = ["${var.worker_ips[count.index]}/24"]
+              addresses = ["${var.worker_ips[count.index]}/${var.node_subnet_prefix}"]
               routes = [
                 {
                   network = "0.0.0.0/0"
