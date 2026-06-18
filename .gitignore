@@ -17,4 +17,5 @@ override.tf.json
 # Ficheros generados
 kubeconfig
 talosconfig
+.talosconfig
 *.bak

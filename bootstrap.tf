@@ -5,33 +5,11 @@
 
 resource "talos_machine_bootstrap" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
-  endpoint             = var.controlplane_ips[0]
-  node                 = var.controlplane_ips[0]
+  endpoint             = var.controlplane_nodes[0].ip
+  node                 = var.controlplane_nodes[0].ip
 
   depends_on = [
     talos_machine_configuration_apply.controlplane
-  ]
-}
-
-# =============================================================================
-# Esperar a que el clúster esté sano
-# =============================================================================
-
-data "talos_cluster_health" "this" {
-  client_configuration = talos_machine_secrets.this.client_configuration
-  control_plane_nodes  = var.controlplane_ips
-  worker_nodes         = var.worker_ips
-  endpoints            = var.controlplane_ips
-
-  timeouts = {
-    read = "10m"
-  }
-
-  skip_kubernetes_checks = true
-
-  depends_on = [
-    talos_machine_bootstrap.this,
-    talos_machine_configuration_apply.worker
   ]
 }
 
@@ -41,10 +19,21 @@ data "talos_cluster_health" "this" {
 
 resource "talos_cluster_kubeconfig" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
-  endpoint             = var.controlplane_ips[0]
-  node                 = var.controlplane_ips[0]
+  endpoint             = var.controlplane_nodes[0].ip
+  node                 = var.controlplane_nodes[0].ip
 
   depends_on = [
-    data.talos_cluster_health.this
+    talos_machine_bootstrap.this,
+    talos_machine_configuration_apply.worker
   ]
+}
+
+# =============================================================================
+# Escribir kubeconfig a disco para uso por herramientas externas (helm, kubectl)
+# =============================================================================
+
+resource "local_file" "kubeconfig" {
+  content         = talos_cluster_kubeconfig.this.kubeconfig_raw
+  filename        = "${path.module}/kubeconfig"
+  file_permission = "0600"
 }

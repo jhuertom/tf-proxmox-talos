@@ -37,12 +37,6 @@ variable "proxmox_insecure" {
 # Proxmox Infrastructure
 # =============================================================================
 
-variable "proxmox_nodes" {
-  description = "Lista de nodos Proxmox donde distribuir las VMs"
-  type        = list(string)
-  default     = ["roman", "antonio", "jacinta"]
-}
-
 variable "proxmox_iso_datastore" {
   description = "Datastore de Proxmox para almacenar la ISO de Talos"
   type        = string
@@ -115,78 +109,32 @@ variable "nameservers" {
 # Control Plane Nodes
 # =============================================================================
 
-variable "controlplane_count" {
-  description = "Número de nodos control plane"
-  type        = number
-  default     = 3
-}
-
-variable "controlplane_ips" {
-  description = "IPs de los nodos control plane (deben coincidir con controlplane_count)"
-  type        = list(string)
-  default     = ["10.0.0.11", "10.0.0.12", "10.0.0.13"]
-}
-
-variable "controlplane_cpu" {
-  description = "Número de cores de CPU para nodos control plane"
-  type        = number
-  default     = 2
-}
-
-variable "controlplane_memory" {
-  description = "Memoria RAM en MB para nodos control plane"
-  type        = number
-  default     = 4096
-}
-
-variable "controlplane_disk_size" {
-  description = "Tamaño del disco en GB para nodos control plane"
-  type        = number
-  default     = 20
-}
-
-variable "controlplane_vm_id_start" {
-  description = "ID de VM inicial para los nodos control plane"
-  type        = number
-  default     = 200
+variable "controlplane_nodes" {
+  description = "Lista de nodos control plane con sus atributos individuales"
+  type = list(object({
+    name         = string
+    ip           = string
+    proxmox_node = string
+    cpu          = number
+    memory       = number
+    disk_size    = number
+    vm_id        = number
+  }))
 }
 
 # =============================================================================
 # Worker Nodes
 # =============================================================================
 
-variable "worker_count" {
-  description = "Número de nodos worker"
-  type        = number
-  default     = 3
-}
-
-variable "worker_ips" {
-  description = "IPs de los nodos worker (deben coincidir con worker_count)"
-  type        = list(string)
-  default     = ["10.0.0.21", "10.0.0.22", "10.0.0.23"]
-}
-
-variable "worker_cpu" {
-  description = "Número de cores de CPU para nodos worker"
-  type        = number
-  default     = 2
-}
-
-variable "worker_memory" {
-  description = "Memoria RAM en MB para nodos worker"
-  type        = number
-  default     = 4096
-}
-
-variable "worker_disk_size" {
-  description = "Tamaño del disco en GB para nodos worker"
-  type        = number
-  default     = 50
-}
-
-variable "worker_vm_id_start" {
-  description = "ID de VM inicial para los nodos worker"
-  type        = number
-  default     = 210
+variable "worker_nodes" {
+  description = "Lista de nodos worker con sus atributos individuales"
+  type = list(object({
+    name         = string
+    ip           = string
+    proxmox_node = string
+    cpu          = number
+    memory       = number
+    disk_size    = number
+    vm_id        = number
+  }))
 }

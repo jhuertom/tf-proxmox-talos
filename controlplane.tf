@@ -1,16 +1,16 @@
 # =============================================================================
 # VMs Control Plane
-# Se distribuyen en round-robin entre los nodos Proxmox
+# Cada nodo se define individualmente en terraform.tfvars
 # =============================================================================
 
 resource "proxmox_virtual_environment_vm" "controlplane" {
-  count = var.controlplane_count
+  for_each = { for n in var.controlplane_nodes : n.name => n }
 
-  name      = "${var.cluster_name}-cp-${count.index}"
-  node_name = var.proxmox_nodes[count.index % length(var.proxmox_nodes)]
-  vm_id     = var.controlplane_vm_id_start + count.index
+  name      = each.value.name
+  node_name = each.value.proxmox_node
+  vm_id     = each.value.vm_id
 
-  description = "Talos Control Plane Node ${count.index} - ${var.cluster_name}"
+  description = "Talos Control Plane Node - ${each.value.name}"
   tags        = ["master", var.cluster_name]
 
   machine = "q35"
@@ -20,19 +20,19 @@ resource "proxmox_virtual_environment_vm" "controlplane" {
 
   # CPU
   cpu {
-    cores = var.controlplane_cpu
+    cores = each.value.cpu
     type  = "x86-64-v2-AES"
   }
 
   # Memoria
   memory {
-    dedicated = var.controlplane_memory
+    dedicated = each.value.memory
   }
 
   # Disco del sistema
   disk {
     datastore_id = var.proxmox_disk_datastore
-    size         = var.controlplane_disk_size
+    size         = each.value.disk_size
     interface    = "scsi0"
     file_format  = "raw"
     ssd          = true
@@ -41,23 +41,22 @@ resource "proxmox_virtual_environment_vm" "controlplane" {
 
   # ISO de Talos
   cdrom {
-    file_id   = proxmox_virtual_environment_download_file.talos_iso[var.proxmox_nodes[count.index % length(var.proxmox_nodes)]].id
+    file_id   = proxmox_virtual_environment_download_file.talos_iso[each.value.proxmox_node].id
     interface = "ide0"
   }
 
-  # Red - conectada a la VNet SDN (10.0.0.0/24)
+  # Red
   network_device {
     bridge = var.network_bridge
   }
 
   # IP estática vía cloud-init network-config (nocloud)
-  # Talos lee el network-config del datasource nocloud al arrancar
   initialization {
     datastore_id = var.proxmox_disk_datastore
 
     ip_config {
       ipv4 {
-        address = "${var.controlplane_ips[count.index]}/${var.node_subnet_prefix}"
+        address = "${each.value.ip}/${var.node_subnet_prefix}"
         gateway = var.gateway
       }
     }
@@ -71,10 +70,8 @@ resource "proxmox_virtual_environment_vm" "controlplane" {
     enabled = true
   }
 
-  # Sin cloud-init, Talos se configura vía su propia API
   on_boot = true
 
-  # Esperar a que la VM arranque antes de aplicar configuración
   lifecycle {
     ignore_changes = [
       boot_order,
@@ -88,23 +85,23 @@ resource "proxmox_virtual_environment_vm" "controlplane" {
 # =============================================================================
 
 resource "talos_machine_configuration_apply" "controlplane" {
-  count = var.controlplane_count
+  for_each = { for n in var.controlplane_nodes : n.name => n }
 
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = data.talos_machine_configuration.controlplane.machine_configuration
 
-  endpoint = var.controlplane_ips[count.index]
-  node     = var.controlplane_ips[count.index]
+  endpoint = each.value.ip
+  node     = each.value.ip
 
   config_patches = [
     yamlencode({
       machine = {
         network = {
-          hostname = "${var.cluster_name}-cp-${count.index}"
+          hostname = each.value.name
           interfaces = [
             {
               interface = "eth0"
-              addresses = ["${var.controlplane_ips[count.index]}/${var.node_subnet_prefix}"]
+              addresses = ["${each.value.ip}/${var.node_subnet_prefix}"]
               routes = [
                 {
                   network = "0.0.0.0/0"

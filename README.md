@@ -11,7 +11,7 @@ Crear el token en Proxmox: **Datacenter → Permissions → API Tokens → Add**
 
 ```bash
 export TF_VAR_proxmox_endpoint="https://192.168.2.X:8006/"
-export TF_VAR_proxmox_api_token="usuario@pam!terraform=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+export TF_VAR_proxmox_api_token='usuario@pam!terraform=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
 ```
 
 ---

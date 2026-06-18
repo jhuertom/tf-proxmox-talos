@@ -16,12 +16,12 @@ output "kubeconfig" {
 
 output "controlplane_ips" {
   description = "IPs de los nodos control plane"
-  value       = var.controlplane_ips
+  value       = [for n in var.controlplane_nodes : n.ip]
 }
 
 output "worker_ips" {
   description = "IPs de los nodos worker"
-  value       = var.worker_ips
+  value       = [for n in var.worker_nodes : n.ip]
 }
 
 output "cluster_endpoint" {

@@ -1,0 +1,56 @@
+# =============================================================================
+# Cilium Helm Values for Talos Linux
+# =============================================================================
+# Este fichero se usa con: helm install cilium cilium/cilium -n kube-system -f manifests/cilium-values.yaml
+#
+# Contexto del clúster:
+#   - Talos Linux con CNI deshabilitado (cni.name = "none" en talos_config.tf)
+#   - kube-proxy deshabilitado en Talos (proxy.disabled = true)
+#   - kubePrism habilitado en puerto 7445
+# =============================================================================
+
+# Reemplazo completo de kube-proxy (necesario porque Talos lo deshabilita)
+kubeProxyReplacement: true
+
+# Endpoint del API server para Cilium operator
+k8sServiceHost: "192.168.3.250"
+k8sServicePort: "6443"
+
+# IPAM
+ipam:
+  mode: kubernetes
+
+# Hubble (observabilidad de red)
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+
+# Réplicas del operator (1 es suficiente para clústeres pequeños)
+operator:
+  replicas: 1
+
+# Talos Linux requiere capabilities explícitas (no permite privileged por defecto)
+securityContext:
+  capabilities:
+    ciliumAgent:
+      - CHOWN
+      - KILL
+      - NET_ADMIN
+      - NET_RAW
+      - IPC_LOCK
+      - SYS_ADMIN
+      - SYS_RESOURCE
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cleanCiliumState:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_RESOURCE
+
+# Política de red por defecto (audit para empezar, luego strict)
+# policyEnforcementMode: default

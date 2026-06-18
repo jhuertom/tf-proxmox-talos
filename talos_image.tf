@@ -4,7 +4,10 @@
 # =============================================================================
 
 resource "proxmox_virtual_environment_download_file" "talos_iso" {
-  for_each = toset(var.proxmox_nodes)
+  for_each = toset(concat(
+    [for n in var.controlplane_nodes : n.proxmox_node],
+    [for n in var.worker_nodes : n.proxmox_node]
+  ))
 
   content_type = "iso"
   datastore_id = var.proxmox_iso_datastore
